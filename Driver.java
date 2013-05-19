@@ -1,12 +1,21 @@
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Random;
 
-public class Driver
+public class Driver implements Serializable
 {
-    static int totalEnginePrice;
+
+	private static final long serialVersionUID = -8213360752748373437L;
+	
+	static int totalEnginePrice;
     static int numberOfEngineServices;
 
     static int totalRadiatorPrice;
@@ -17,20 +26,18 @@ public class Driver
     
     static int totalBrakePrice;
     static int numberOfBrakeServices;
-    static ArrayList<Service> services;
-    static MechanicShop myShop;
+    ArrayList<Service> services;
+    MechanicShop myShop;
     
     static final int MAX_SERVICES = 100;
-    public static final int COUPON_MIN_YEAR = 2007;
-    public static final int COUPON_MAX_YEAR = 2012;
-	public static final int DAYS_IN_MONTH = 29;
-	public static final int MONTHS_IN_YEAR = 12;
-	public static final int MAX_MILES = 300000;
-	
+    
 	public static final int ENGINE_OIL = 0;
 	public static final int RADIATOR_FLUSH = 1;
 	public static final int TIRE_SERVICE = 2;
 	public static final int BRAKE_SERVICE = 3;
+	
+	public static Driver g;
+	public static final String SERIAL_FILE = "Mechanic.dzg";
 	
 	/**
 	 * Entry point into the program
@@ -38,18 +45,36 @@ public class Driver
 	 * 	None needed
 	 */
 	public static void main(String[] args) {
-        new Driver().start();
+       
+        //Uncomment each section to run different parts
+		
+        /* Project 1:
+		/* Randomly populate service array, performs list operations such as
+		/* inserting, replacing, and deleting. See g.start()
+		 */
+		// g = new Driver();
+        // g.start();
+        
+        
+        /* Project 2:
+         * Creates a Driver object, populates it, and then serializes it into 
+         * an output file ("Mechanic.dzg")
+         */
+		
+		/** Part 1: Serialize **/
+		// g = new Driver();
+        // g.start();
+        // g.serialize();
+        
+		/**
+		 * Reads object from file and prints list of services.
+		 * Run this after writing serialized Driver to output file.
+		 */
+        /** Part 2: Deserialize **/
+        // g = deserialize();
+        // g.alt_start();
     }
 	
-	/**
-	 * Constructor for Driver objects. At the moment, simply instantiates a
-	 * new driver and calls its start() method.
-	 */
-    public Driver() {
-    	myShop = new MechanicShop();
-        services = new ArrayList<Service>();    
-    }
-    
     /**
      * Handles the assignment objectives:
      * 
@@ -73,7 +98,8 @@ public class Driver
 
 		//	Step 8:  Do Step 2
      */
-    private void start() {
+    @SuppressWarnings("unused")
+	private void start() {
     	printHeader();
         populateServiceList();
         checkForCoupons();       
@@ -91,6 +117,84 @@ public class Driver
         printHeader();
         printServiceTypes();				// Step 8
     }
+	
+    /**
+	 * Prints service list from a serialized object. Must be different because many
+	 * values are not serialized.
+	 * Alternatively, this can be used at any time to print a simplified service list.
+	 */
+	public void alt_start() {
+		for (Service p : g.services) {
+			System.out.printf("Index: %2d\t Service:%-12s\t \n", 
+	                services.indexOf(p), 
+	                p.toString() 
+	                );
+		}
+	}
+	
+	/**
+	 * Serialize the current Driver class and write it to a file.
+	 */
+	public void serialize() {
+		FileOutputStream fileSer = null;
+        ObjectOutputStream out = null;
+		try 
+		{
+			fileSer = new FileOutputStream(SERIAL_FILE);
+			out = new ObjectOutputStream(fileSer);
+			out.writeObject(g);
+			out.close();
+			fileSer.close();
+		} 
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	/**
+	 * Deserializes a Driver object from a file
+	 * @return
+	 * 	Returns a Driver object with applicable fields recalled from file
+	 */
+	public static Driver deserialize () {
+		Driver h = null;
+		ObjectInputStream filein = null;
+		FileInputStream fileDeSer = null;
+		
+		try 
+		{
+			fileDeSer = new FileInputStream(SERIAL_FILE);
+			filein = new ObjectInputStream(fileDeSer);
+			h = (Driver) filein.readObject();
+			fileDeSer.close();
+			filein.close();
+			
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		} 
+		catch(ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return h;
+
+	}
+	
+	/**
+	 * Constructor for Driver objects. At the moment, simply instantiates a
+	 * new driver, an associated shop, and list to hold all services.
+	 */
+    public Driver() {
+    	this.myShop = new MechanicShop();
+        this.services = new ArrayList<Service>();    
+    }
+    
     /**
      * Inserts a new service into the service list.
      * 
@@ -99,7 +203,7 @@ public class Driver
      * @param location
      * 	Index in which to place the new service.
      */
-    private static void insertService(int serviceToInsert, int location) {
+    private void insertService(int serviceToInsert, int location) {
     	services.add(location, getService(serviceToInsert));
     }
     
@@ -111,7 +215,7 @@ public class Driver
      * @param serviceToSub
      * 	Code for service that will replace the removed service.
      */
-    public static void replaceServices(int serviceToRemove, int serviceToSub){
+    public void replaceServices(int serviceToRemove, int serviceToSub){
     	ListIterator<Service> i = services.listIterator();
     	
     	while(i.hasNext()) {
@@ -152,7 +256,7 @@ public class Driver
      * @param serviceToRemove
      * 	Code for service type to be deleted.
      */
-    public static void deleteServices(int serviceToRemove){
+    public void deleteServices(int serviceToRemove){
     	Iterator<Service> i = services.iterator();
     	
     	while(i.hasNext()) {
@@ -192,7 +296,7 @@ public class Driver
      * Iterates the service array and passes each service along to a print formatter.
      * Call this anytime you want to display a full list of all services and associated data.
      */
-    public static void printServiceTypes() {
+    public void printServiceTypes() {
     	for (Service i : services) {
     		printIndividualServiceOutput(i);
     	}
@@ -202,7 +306,7 @@ public class Driver
     * Initializes the service list with randomized services.
     * Takes care of assigning a random mechanic, service date, and associated car, and prints the results.
     */
-    private static void populateServiceList() {
+    private void populateServiceList() {
     	Service tempRandomService;
     	
 	    for (int i = 0; i < MAX_SERVICES; i++) {
@@ -213,14 +317,7 @@ public class Driver
 	    	// Add it to the list
 	    	services.add(tempRandomService);
 	    	
-	        // Create and set a random Sedan
-	    	tempRandomService.setSedan(new Sedan(getRandomVIN(), getRandomMiles()));
-	
-	        // Randomly assign a Mechanic
-	    	tempRandomService.setMechanic(myShop.getRandomMechanic());
-	        
-	        // Randomly assign a service date
-	    	tempRandomService.setServiceDate(getRandomServiceDate());
+	    	tempRandomService.initialize(myShop);
 	
 	        // Formatted Output
 	        printIndividualServiceOutput(tempRandomService); 
@@ -241,7 +338,7 @@ public class Driver
      * 
      * #TODO: Maybe make the service's toString take care of this..?
      */
-    private static void printIndividualServiceOutput(Service p) {
+    private void printIndividualServiceOutput(Service p) {
     	System.out.printf("%2d\t %-12s\t %-15s\t $%3d.00\t %8s\n", 
                 services.indexOf(p), 
                 p.toString(), 
@@ -254,7 +351,7 @@ public class Driver
     /**
      * Iterates over the service list and applies any relevant coupons.
      */
-    private static void checkForCoupons() {
+    private void checkForCoupons() {
     	for (Service j : services) {
             // Check service data against expiration date
             ServiceCoupon checker = new ServiceCoupon();
@@ -271,48 +368,7 @@ public class Driver
         System.out.printf("Tire Service:\t %2d\t Total: $%3d.00 \n",numberOfTireServices, totalTirePrice);
         System.out.printf("Brake Service:\t %2d\t Total: $%3d.00 \n",numberOfBrakeServices, totalBrakePrice);
     }
-    
-    /**
-     * Generates random VIN numbers for cars.
-     * @return
-     * 	Returns a string conforming to the following rules: 
-     * 	First 4 characters - Letters between A and Z
-     * 	Last 4 characters - Numbers between 0 and 9
-     */
-    private static String getRandomVIN() {
-    	String randomVINstring = "";
-        for (int j = 0; j < 4; j++) {
-            char c = (char)(new Random().nextInt(26) + 'A');
-            randomVINstring += c;
-        }
-        // Only adds on 4 digit numbers
-        return (randomVINstring += new Random().nextInt(9999-1000+1)+1000);
-    }
-    
-   /**
-    * 
-    * @return
-    * 	Returns a random number of miles bounded by MAX_MILES, defined in the Driver class.
-    */
-    private static int getRandomMiles() {
-    	return new Random().nextInt(MAX_MILES);
-    }
-    
-    /**
-     * Constructs a calendar object within certain confines defined in the Driver class.
-     * @return
-     * 	A calendar object within a specific timeframe.
-     */
-    private static GregorianCalendar getRandomServiceDate() {
-    	
-    	
-        // Randomly assign a service date (Random = [(max-min)+1]+min
-        int serviceYear = new Random().nextInt((COUPON_MAX_YEAR-COUPON_MIN_YEAR)+1)+COUPON_MIN_YEAR; // 2007-2012
-        int serviceMonth = new Random().nextInt((MONTHS_IN_YEAR-1)+1)+1; // 1-12
-        int serviceDay = new Random().nextInt(DAYS_IN_MONTH); // 0-28
-        return new GregorianCalendar(serviceYear, serviceMonth, serviceDay);
-    }
-        
+      
     /**
      * Wrapper for generating services. Also handles incrementing net totals.
      * #TODO: This probably shouldn't handle net totals. :)
@@ -322,7 +378,7 @@ public class Driver
      * @return
      * 	Returns a new service object.
      */
-    private static Service getService(int whichService) {
+    private Service getService(int whichService) {
     	
     	Service randomService = null;
         switch (whichService) {
@@ -348,6 +404,7 @@ public class Driver
                 break;
             default: break; 
         }
+        randomService.initialize(myShop);
         return randomService;
     }
 }

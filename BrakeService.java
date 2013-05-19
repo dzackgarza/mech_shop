@@ -1,11 +1,10 @@
+import java.io.Serializable;
 
+public class BrakeService extends Service implements Serializable {
+	private static final long serialVersionUID = -3451322473081660344L;
+	private static final int ServicePrice = 250;
 
-public class BrakeService extends Service
-{
-    private static final int ServicePrice = 250;
-
-    public BrakeService()
-    {
+    public BrakeService() {
         super(ServicePrice);
     }
 

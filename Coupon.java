@@ -1,16 +1,22 @@
-public abstract class Coupon
-{
-    private int year;
+import java.io.Serializable;
+
+@SuppressWarnings("unused")
+public abstract class Coupon implements Serializable {
+	
+	private static final long serialVersionUID = 7833065549659455645L;
+	
+	
+	private int year;
     private int month;
     private int day;
 
     public void setYear(int setYear){
-        this.year = setYear;
+        year = setYear;
     }
     public void setMonth(int setMonth){
-        this.month = setMonth;
+        month = setMonth;
     }
     public void setDay(int setDay){
-        this.day = setDay;
+        day = setDay;
     }
 }

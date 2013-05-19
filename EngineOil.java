@@ -1,11 +1,12 @@
+import java.io.Serializable;
 
-public class EngineOil extends Service
-{
 
-    private static final int ServicePrice = 70;
+public class EngineOil extends Service implements Serializable {
 
-    public EngineOil()
-    {
+	private static final long serialVersionUID = -4070321490741767533L;
+	private static final int ServicePrice = 70;
+
+    public EngineOil() {
         super(ServicePrice);
     }
     

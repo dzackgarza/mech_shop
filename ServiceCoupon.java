@@ -1,12 +1,17 @@
 import java.util.*;
 
-public class ServiceCoupon extends Coupon
+public class ServiceCoupon extends Coupon 
 {
-    Random randomNumber = new Random();
+	private static final long serialVersionUID = 8959226675100900677L;
+	
+	Random randomNumber = new Random();
     final Calendar expiryDate;
     int discount = 0; // As in integer percentage
-    public ServiceCoupon()
-    {
+    
+    /**
+     * Default constructor for ServiceCoupon objects
+     */
+    public ServiceCoupon() {
         int expiryYear = 2013;
         int expiryMonth = randomNumber.nextInt((12-1)+1)+1; // 1-12
         int expiryDay = randomNumber.nextInt(29); // 0-28
@@ -15,7 +20,6 @@ public class ServiceCoupon extends Coupon
         this.setYear(expiryYear);
         this.setMonth(expiryMonth);
         this.setDay(expiryDay);
-        
     }
 
     public void checkCoupon(Service service, int position) {
